@@ -1,13 +1,13 @@
 {
-	"name": "phaser3-parcel-template",
+	"name": "actividad-3",
 	"version": "1.0.0",
-	"description": "A template project for Phaser 3 using Parceljs",
+	"description": "Proyecto para la asignatura introducción a la programación de videojuegos.",
 	"scripts": {
 		"start": "parcel src/index.html -p 8000",
 		"build": "parcel build src/index.html --out-dir dist",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "supertommy",
+	"author": "Jaume Lloret Enríqez",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -21,7 +21,8 @@
 		"eslint": "^6.8.0",
 		"minimist": ">=1.2.2",
 		"parcel-plugin-clean-easy": "^1.0.2",
-		"parcel-plugin-static-files-copy": "^2.4.3"
+		"parcel-plugin-static-files-copy": "^2.4.3",
+		"parcel-bundler": "1.12.5"
 	},
 	"dependencies": {
 		"phaser": "^3.55.2"
