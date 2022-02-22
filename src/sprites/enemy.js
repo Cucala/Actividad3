@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-export default class Player extends Phaser.Physics.Arcade.Sprite {
+export default class Enemy extends Phaser.Physics.Arcade.Sprite {
   
   /**
    * @param {Phaser.Scene} scene

@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { ScrollingXCamara } from '../cameras/scrolling_x_camara';
+import ScrollingCamaraInX from '../cameras/scrolling_camara_in_x';
 import Player from '../sprites/player';
 
 export default class LevelOneScene extends Phaser.Scene
@@ -35,14 +35,13 @@ export default class LevelOneScene extends Phaser.Scene
     const ground = map.createLayer("hierbaLayer", tiles).setDepth(100);
 
 
-    //this.cameras.add(new ScrollingXCamara(this.cameras.main.x, this.cameras.main.y, 960, 640, this.player.x, 410));
-    this.cameras.main.setSize(960, 640);
-    this.cameras.main.scrollX =  this.player.x - 410;
+    this.scrollingCamera = new ScrollingCamaraInX(this, 960, 640, this.player.x, 412);
+    
   }
 
   update() {
     this.player.update();
-    this.cameras.main.scrollX =  this.player.x - 410;
+    this.scrollingCamera.update(this.player.x);
   }
 
   /**
