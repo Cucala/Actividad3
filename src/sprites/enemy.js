@@ -1,114 +1,126 @@
 import Phaser from 'phaser';
+// eslint-disable-next-line no-unused-vars
+import Scene from '../scenes/scene';
 
 export default class Enemy extends Phaser.Physics.Arcade.Sprite {
-  
   /**
-   * @param {Phaser.Scene} scene
+   * @param {Scene} scene
    * @param {number} x
    * @param {number} y
-   * @param {string} texture
+   * @param {number} width
+   * @param {number} height
+   * @param {string} textureName
+   * @param {number} tileHeight
    */
-  constructor(scene, x, y, texture) {
-    super(scene, x, y, texture)
+  constructor(scene, x, y, width, height, textureName, tileHeight) {
+    super(scene, x, y, textureName);
     
+    /**
+     * @type {number}
+     */
+    this.tileHeight = tileHeight;
+
+    /**
+     * @type {number}
+     */
+    this.velocity = 100;
+    
+    /**
+     * @type {number}
+     */
+    this.direction = 1;
+
+    /**
+     * @type {Scene}
+     */
     this.scene = scene;
+    this.scene.physics.add.collider(this, this.scene.collisionLayer);
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
-    this.setBodySize(90, 180, true);
 
+    this.setBodySize(width, height, true);
+
+    this.createAnimation('explosion', 'crash', 0, 3, 7);
+    this.on('animationcomplete', this.isDead, this)
+  }
+
+  /**
+   * @param {string} key
+   * @param {string} texture
+   * @param {number} start
+   * @param {number} end
+   * @param {number} frameRate
+   * @param {number} repeat
+   */
+  createAnimationWithRepeat(key, texture, start, end, frameRate, repeat) {
     this.scene.anims.create(
       {
-        key: 'walk',
-        frames: this.scene.anims.generateFrameNumbers(texture, {start: 2, end: 5}),
-        frameRate: 10,
-        repeat: -1,
+        key: key,
+        frames: this.scene.anims.generateFrameNumbers(
+          texture,
+          { start: start, end: end }
+        ),
+        frameRate: frameRate,
+        repeat: repeat,
       }
     );
+  }
 
+/**
+   * @param {string} key
+   * @param {string} texture
+   * @param {number} start
+   * @param {number} end
+   * @param {number} frameRate
+   */
+  createAnimation(key, texture, start, end, frameRate) {
     this.scene.anims.create(
       {
-        key: 'repose',
-        frames: this.scene.anims.generateFrameNumbers(texture, {start: 0, end: 1}),
-        frameRate: 4,
-        repeat: -1,
+        key: key,
+        frames: this.scene.anims.generateFrameNumbers(
+          texture,
+          { start: start, end: end }
+        ),
+        frameRate: frameRate
       }
     );
-
-    this.scene.anims.create(
-      {
-        key: 'fall',
-        frames: this.scene.anims.generateFrameNumbers(texture, {start: 6, end: 7}),
-        frameRate: 7,
-        repeat: -1,
-      }
-    );
-
-    this.setCollideWorldBounds(true);
-    this.cursors = this.scene.input.keyboard.createCursorKeys();
   }
 
   update() {
-    this.inputHandler();
-    this.animation();
+    this.setVelocityX(this.direction * this.velocity);
+    let x = Math.floor(this.x / this.tileHeight) + this.direction;
+    let y = Math.round((this.y + this.height / 2) / this.tileHeight);
+
+    if(!this.existFloor(x, y) && this.body.blocked.down) {
+      this.direction *= -1;
+    }
+
+    this.changeDirection()
+    ? this.flipX = true
+    : this.flipX = false;
   }
 
-  inputHandler() {
-    this.moveDown();
-
-    if(this.onFloor()) {
-      this.moveUp();
-    }
-
-    if(this.onFloor() || !this.flipX) {
-      this.moveRight();
-    }
-
-    if(this.onFloor() || this.flipX) {
-      this.moveLeft();
-    }
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @returns {boolean}
+   */
+  existFloor(x, y) {
+    return this.scene.collisionLayer.hasTileAt(x, y);
   }
 
-  animation() {
-    if(!this.onFloor()) {
-      this.play('fall', true);
-      return;
-    }
-
-    if(this.onMoviment()) {
-      this.play('walk', true);
-      return;
-    }
-
-    if(this.onFloor()) {
-      this.play('repose', true);
-      return;
-    }
+  /**
+   * @returns {boolean}
+   */
+  changeDirection() {
+    return this.direction > 0
   }
 
-  moveUp() {
-    if(this.cursors.up.isDown) {
-      this.setVelocityY(-250);
-    }
-  }
-
-  moveDown() {
-    if(this.cursors.down.isDown) {
-      this.setVelocityY(200);
-    }
-  }
-
-  moveLeft() {
-    if(this.cursors.left.isDown) {
-      this.setVelocityX(-200);
-      this.flipX = true;
-    }
-  }
-
-  moveRight() {
-    if(this.cursors.right.isDown) {
-      this.setVelocityX(200);
-      this.flipX = false;
-    }
+  /**
+   * @param {string} key
+   */
+  activateAnimation(key) {
+    this.play(key, true);
   }
 
   /**
@@ -123,6 +135,23 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
    */
   onMoviment() {
     return this.body.velocity.x != 0;
+  }
+
+  die() {
+    this.disableBody();
+    this.play('explosion', true);
+  }
+
+  /**
+   * @param {Phaser.Animations.Animation} animation
+   * @param {Phaser.Textures.Frame} frame
+   * @param {Phaser.Physics.Arcade.Sprite} sprite
+   */
+  // eslint-disable-next-line no-unused-vars
+  isDead(animation, frame, sprite) {
+    if(animation.key === "explosion") {
+      this.disableBody(true, true);
+    }
   }
 
 }
