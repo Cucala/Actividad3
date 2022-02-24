@@ -15,7 +15,7 @@ export default class AntEnemy extends Enemy {
   constructor(scene, x, y, width, height, textureName, tileHeight) {
     super(scene, x, y, width, height, textureName, tileHeight);
     
-    this.createAnimationWithRepeat("antWalk", 'ant', 0, 3, 10, -1);
+    this.createAnimationWithRepeat("antWalk", textureName, 0, 3, 10, -1);
 
     this.activateAnimation("antWalk");
   }

@@ -1,8 +1,8 @@
-import Phaser from 'phaser';
-// eslint-disable-next-line no-unused-vars
+/* eslint-disable no-unused-vars */
 import Scene from '../scenes/scene';
+import Sprite from './sprite';
 
-export default class Enemy extends Phaser.Physics.Arcade.Sprite {
+export default class Enemy extends Sprite {
   /**
    * @param {Scene} scene
    * @param {number} x
@@ -10,7 +10,7 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
    * @param {number} width
    * @param {number} height
    * @param {string} textureName
-   * @param {number} tileHeight
+   * @param {number?} tileHeight
    */
   constructor(scene, x, y, width, height, textureName, tileHeight) {
     super(scene, x, y, textureName);
@@ -30,63 +30,14 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
      */
     this.direction = 1;
 
-    /**
-     * @type {Scene}
-     */
-    this.scene = scene;
-    this.scene.physics.add.collider(this, this.scene.collisionLayer);
-    this.scene.add.existing(this);
-    this.scene.physics.add.existing(this);
-
-    this.setBodySize(width, height, true);
-
-    this.createAnimation('explosion', 'crash', 0, 3, 7);
-    this.on('animationcomplete', this.isDead, this)
+    width < 0 || height < 0 ? this.setBodySize(width, height, true) : null;
   }
 
   /**
-   * @param {string} key
-   * @param {string} texture
-   * @param {number} start
-   * @param {number} end
-   * @param {number} frameRate
-   * @param {number} repeat
+   * @param {number} time
+   * @param {number} delta
    */
-  createAnimationWithRepeat(key, texture, start, end, frameRate, repeat) {
-    this.scene.anims.create(
-      {
-        key: key,
-        frames: this.scene.anims.generateFrameNumbers(
-          texture,
-          { start: start, end: end }
-        ),
-        frameRate: frameRate,
-        repeat: repeat,
-      }
-    );
-  }
-
-/**
-   * @param {string} key
-   * @param {string} texture
-   * @param {number} start
-   * @param {number} end
-   * @param {number} frameRate
-   */
-  createAnimation(key, texture, start, end, frameRate) {
-    this.scene.anims.create(
-      {
-        key: key,
-        frames: this.scene.anims.generateFrameNumbers(
-          texture,
-          { start: start, end: end }
-        ),
-        frameRate: frameRate
-      }
-    );
-  }
-
-  update() {
+  update(time, delta) {
     this.setVelocityX(this.direction * this.velocity);
     let x = Math.floor(this.x / this.tileHeight) + this.direction;
     let y = Math.round((this.y + this.height / 2) / this.tileHeight);
@@ -114,44 +65,6 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
    */
   changeDirection() {
     return this.direction > 0
-  }
-
-  /**
-   * @param {string} key
-   */
-  activateAnimation(key) {
-    this.play(key, true);
-  }
-
-  /**
-   * @returns {boolean}
-   */
-  onFloor() {
-    return this.body.velocity.y == 0;
-  }
-
-  /**
-   * @returns {boolean}
-   */
-  onMoviment() {
-    return this.body.velocity.x != 0;
-  }
-
-  die() {
-    this.disableBody();
-    this.play('explosion', true);
-  }
-
-  /**
-   * @param {Phaser.Animations.Animation} animation
-   * @param {Phaser.Textures.Frame} frame
-   * @param {Phaser.Physics.Arcade.Sprite} sprite
-   */
-  // eslint-disable-next-line no-unused-vars
-  isDead(animation, frame, sprite) {
-    if(animation.key === "explosion") {
-      this.disableBody(true, true);
-    }
   }
 
 }

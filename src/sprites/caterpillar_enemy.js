@@ -15,7 +15,7 @@ export default class CaterpillarEnemy extends Enemy {
   constructor(scene, x, y, width, height, textureName, tileHeight) {
     super(scene, x, y, width, height, textureName, tileHeight);
     
-    this.createAnimationWithRepeat("caterpillarWalk", 'caterpillar', 0, 3, 7, -1);
+    this.createAnimationWithRepeat("caterpillarWalk", textureName, 0, 3, 7, -1);
 
     this.activateAnimation("caterpillarWalk");
   }

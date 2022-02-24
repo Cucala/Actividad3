@@ -8,7 +8,7 @@ export default class ScrollingCamaraInX {
    */
     constructor(scene, width, height, playerPositionInX, backgroundSizeInX) {
       this.scene = scene;
-      this.scene.cameras.main.setSize(width, height);
+      this.scene.cameras.main.setBounds(0, 0, width, height);
       this.backgroundSizeInX = backgroundSizeInX;
       this.scene.cameras.main.scrollX =  playerPositionInX - backgroundSizeInX;
     }

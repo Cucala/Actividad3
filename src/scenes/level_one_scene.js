@@ -13,6 +13,7 @@ export default class LevelOneScene extends Scene
 
   preload() {
     this.load.image('bg', 'assets/fondo-infinito.jpg');
+    this.load.image('goal', 'assets/meta.png');
     this.load.spritesheet(
       'player',
       'assets/player.png',
@@ -27,6 +28,11 @@ export default class LevelOneScene extends Scene
       'caterpillar',
       'assets/oruga.png',
       {frameWidth: 96, frameHeight: 192}
+    );
+    this.load.spritesheet(
+      'wasp',
+      'assets/avispa.png',
+      {frameWidth: 128, frameHeight: 128}
     );
     this.load.spritesheet(
       'crash',
@@ -55,7 +61,6 @@ export default class LevelOneScene extends Scene
     );
     this.player = new Player(this, playerFormTiled[0].x, playerFormTiled[0].y, "player");
 
-    
     const ground = map.createLayer("hierbaLayer", tiles).setDepth(100);
 
     const enemies = EnemyFactory.create(
@@ -69,7 +74,7 @@ export default class LevelOneScene extends Scene
     );
     this.physics.add.overlap(this.player, enemies, this.player.checkEnemyCollision, null, this.player);
 
-    this.scrollingCamera = new ScrollingCamaraInX(this, 960, 640, this.player.x, 412);
+    this.scrollingCamera = new ScrollingCamaraInX(this, 3520, 640, this.player.x, 412);
   }
 
   update() {

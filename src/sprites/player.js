@@ -1,11 +1,9 @@
-import Phaser from 'phaser';
-// eslint-disable-next-line no-unused-vars
+/* eslint-disable no-unused-vars */
 import Scene from '../scenes/scene';
-// eslint-disable-next-line no-unused-vars
 import Enemy from './enemy';
+import Sprite from './sprite';
 
-export default class Player extends Phaser.Physics.Arcade.Sprite {
-  
+export default class Player extends Sprite {
   /**
    * @param {Scene} scene
    * @param {number} x
@@ -21,68 +19,33 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.alive = true;
 
     /**
-     * @type {Scene}
+     * @type {boolean}
      */
-    this.scene = scene;
-    this.scene.physics.add.collider(this, this.scene.collisionLayer);
-    this.scene.add.existing(this);
-    this.scene.physics.add.existing(this);
+    this.stunned = false;
+    
     this.setBodySize(90, 180, true);
     
-
-    this.scene.anims.create(
-      {
-        key: 'playerWalk',
-        frames: this.scene.anims.generateFrameNumbers(
-          texture,
-          {start: 2, end: 5}
-        ),
-        frameRate: 10,
-        repeat: -1,
-      }
-    );
-
-    this.scene.anims.create(
-      {
-        key: 'playerRepose',
-        frames: this.scene.anims.generateFrameNumbers(
-          texture,
-          {start: 0, end: 1}
-        ),
-        frameRate: 4,
-        repeat: -1,
-      }
-    );
-
-    this.scene.anims.create(
-      {
-        key: 'playerFall',
-        frames: this.scene.anims.generateFrameNumbers(
-          texture,
-          {start: 6, end: 7}
-        ),
-        frameRate: 7,
-        repeat: -1,
-      }
-    );
-
-    this.on('animationcomplete', this.isDead, this)
+    this.createAnimationWithRepeat("playerWalk", texture, 2, 5, 10, -1);
+    this.createAnimationWithRepeat("playerRepose", texture, 0, 1, 4, -1);
+    this.createAnimationWithRepeat("playerFall", texture, 6, 7, 7, -1);
 
     this.cursors = this.scene.input.keyboard.createCursorKeys();
   }
 
   update() {
     this.stopMoviment();
-    this.inputHandler();
+    if(!this.stunned) {
+      this.inputHandler();
+    }
     this.animation();
   }
 
   inputHandler() {
     this.moveDown();
 
-    //if(this.onFloor()) {
+    if(this.onFloor()) {
       this.moveUp();
-    //}
+    }
 
     if(this.onFloor() || !this.flipX) {
       this.moveRight();
@@ -96,18 +59,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   animation() {
     if(this.alive) {
       if(!this.onFloor()) {
-        this.play('playerFall', true);
+        this.activateAnimation('playerFall');
         return;
       }
 
-      if(this.onMoviment()) {
-        this.play('playerWalk', true);
-        return;
-      }
+      if(!this.stunned) {
+        if(this.onMoviment()) {
+          this.activateAnimation('playerWalk');
+          return;
+        }
 
-      if(this.onFloor()) {
-        this.play('playerRepose', true);
-        return;
+        if(this.onFloor()) {
+          this.activateAnimation('playerRepose');
+          return;
+        }
       }
     }
   }
@@ -159,34 +124,21 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
   die() {
     this.alive = false;
-    this.disableBody();
-    this.play('explosion', true);
+    super.die();  
   }
 
-  /**
-   * @param {Phaser.Animations.Animation} animation
-   * @param {Phaser.Textures.Frame} frame
-   * @param {Phaser.Physics.Arcade.Sprite} sprite
-   */
-  // eslint-disable-next-line no-unused-vars
-  isDead(animation, frame, sprite) {
-    if(animation.key === "explosion") {
-      this.disableBody(true, true);
-    }
+  beingStunned() {
+    this.stunned = true;
+    this.setVelocity(-150, -150);
+    this.scene.time.addEvent({
+      delay: 1000,
+      callback: this.wakingUp,
+      callbackScope: this
+    });
   }
 
-  /**
-   * @returns {boolean}
-   */
-  onFloor() {
-    return this.body.velocity.y == 0;
-  }
-
-  /**
-   * @returns {boolean}
-   */
-  onMoviment() {
-    return this.body.velocity.x != 0;
+  wakingUp() {
+    this.stunned = false;
   }
 
   /**
